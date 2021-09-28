@@ -11,7 +11,7 @@
   
   <title>
     
-      突破 JDK9 以上 module 访问限制 
+      绕过 JDK9 以上 module 访问限制 
       
       
       |
@@ -133,33 +133,22 @@ MathJax = {
   <!-- 文章内容页 url形式：https://yoursite/文章标题/ -->
   <div class="container post-details" id="post-details">
     <div class="post-content">
-      <div class="post-title">突破 JDK9 以上 module 访问限制</div>
+      <div class="post-title">绕过 JDK9 以上 module 访问限制</div>
       <div class="post-attach">
         <span class="post-pubtime">
           <i class="iconfont icon-updatetime" title="Update time"></i>
-          2021-09-27 17:52:45
+          2021-09-28 18:36:56
         </span>
         
-              <span class="post-tags">
-                <i class="iconfont icon-tags" title="Tags"></i>
-                
-                <span class="span--tag">
-                  <a href="/tags/Java/" title="Java">
-                    <b>#</b> Java
-                  </a>
-                </span>
-                
-              </span>
-          
       </div>
       <div class="markdown-body">
         <hr>
 <p>从 JDK9 以上新增了 module。它可以限制我们对于包的访问，而在 JDK9 之前我们只能使用 public、protected、private 和默认的包权限来进行访问控制。</p>
 <p>在 JDK9 以上的 jar 包中新增了 module-info 文件，其中的关键字 exports 来指定该模块下哪些包可以被访问。</p>
-<img src="/2021/09/27/%E7%AA%81%E7%A0%B4-JDK9-%E4%BB%A5%E4%B8%8A-module-%E8%AE%BF%E9%97%AE%E9%99%90%E5%88%B6/1.png" class="" title="module-info">
+<img src="/2021/09/28/%E7%BB%95%E8%BF%87-JDK9-%E4%BB%A5%E4%B8%8A-module-%E8%AE%BF%E9%97%AE%E9%99%90%E5%88%B6/1.png" class="" title="module-info">
 
 <p>如果我们想访问一个没有导出的包，编译器将报错。</p>
-<img src="/2021/09/27/%E7%AA%81%E7%A0%B4-JDK9-%E4%BB%A5%E4%B8%8A-module-%E8%AE%BF%E9%97%AE%E9%99%90%E5%88%B6/2.png" class="" title="没有导出的类报错">
+<img src="/2021/09/28/%E7%BB%95%E8%BF%87-JDK9-%E4%BB%A5%E4%B8%8A-module-%E8%AE%BF%E9%97%AE%E9%99%90%E5%88%B6/2.png" class="" title="没有导出的类报错">
 
 <p>通常的做法是我们在程序编译的时候来添加 –add-exports 选项来解决这个问题例如：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java.base/jdk.internal.loader=ALL-UNNAMED</span><br></pre></td></tr></table></figure>
@@ -167,22 +156,21 @@ MathJax = {
 <p>但是如果我们想从代码里直接使用，并且如果我们的漏洞刚好要使用一个没有导出的类该怎么做。于是我尝试利用反射来调用，代码如下：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.lang.reflect.Constructor;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        Class c = Class.forName(<span class="string">&quot;jdk.internal.loader.BootLoader&quot;</span>);</span><br><span class="line">        Constructor con = c.getDeclaredConstructor(<span class="keyword">new</span> Class[]&#123;&#125;);</span><br><span class="line">        con.setAccessible(<span class="keyword">true</span>);</span><br><span class="line">        System.out.println(con.newInstance(<span class="keyword">null</span>));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>在运行的时候产生了报错。</p>
-<img src="/2021/09/27/%E7%AA%81%E7%A0%B4-JDK9-%E4%BB%A5%E4%B8%8A-module-%E8%AE%BF%E9%97%AE%E9%99%90%E5%88%B6/3.png" class="" title="报错">
+<img src="/2021/09/28/%E7%BB%95%E8%BF%87-JDK9-%E4%BB%A5%E4%B8%8A-module-%E8%AE%BF%E9%97%AE%E9%99%90%E5%88%B6/3.png" class="" title="报错">
 
 <p>我们不能直接通过反射来使用一个没有导出的类，通过报错可知在 setAccessible 时调用了 checkCanSetAccessible 方法产生了异常，跟进 checkCanSetAccessible 最终来到了 AccessibleObject 类的 checkCanSetAccessible 方法，在方法的 337 行产生了 InaccessibleObjectException 异常。</p>
-<img src="/2021/09/27/%E7%AA%81%E7%A0%B4-JDK9-%E4%BB%A5%E4%B8%8A-module-%E8%AE%BF%E9%97%AE%E9%99%90%E5%88%B6/4.png" class="" title="checkCanSetAccessible方法">
+<img src="/2021/09/28/%E7%BB%95%E8%BF%87-JDK9-%E4%BB%A5%E4%B8%8A-module-%E8%AE%BF%E9%97%AE%E9%99%90%E5%88%B6/4.png" class="" title="checkCanSetAccessible方法">
 
 <p>那么如果在产生异常之前直接返回 true 是否就可以绕过这个限制？于是我尝试这个方法最开始的几条语句。</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Module callerModule = caller.getModule();</span><br><span class="line">Module declaringModule = declaringClass.getModule();</span><br><span class="line"><span class="keyword">if</span> (callerModule == declaringModule) <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line"><span class="keyword">if</span> (callerModule == Object.class.getModule()) <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line"><span class="keyword">if</span> (!declaringModule.isNamed()) <span class="keyword">return</span> <span class="keyword">true</span>;</span><br></pre></td></tr></table></figure>
 
 <p>只要这里其中之一返回 true 就可以，callerModule 代表当前调用的那个类所在包的 module，使用 native 方法 Reflection.getCallerClass() 获取的，declaringModule 代表你要反射的那个类所在包的 module。</p>
-<img src="/2021/09/27/%E7%AA%81%E7%A0%B4-JDK9-%E4%BB%A5%E4%B8%8A-module-%E8%AE%BF%E9%97%AE%E9%99%90%E5%88%B6/5.png" class="">
+<img src="/2021/09/28/%E7%BB%95%E8%BF%87-JDK9-%E4%BB%A5%E4%B8%8A-module-%E8%AE%BF%E9%97%AE%E9%99%90%E5%88%B6/5.png" class="">
 
 <p>只要让 callerModule == declaringModule 即可，declaringModule 是从你要反射的那个类的 Class 中获取的，只需要改变该 Class 的 module 属性即可，于是改变代码为：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.lang.reflect.Constructor;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Field;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        Class c = Class.forName(<span class="string">&quot;jdk.internal.loader.BootLoader&quot;</span>);</span><br><span class="line">        Constructor con = c.getDeclaredConstructor(<span class="keyword">new</span> Class[]&#123;&#125;);</span><br><span class="line"></span><br><span class="line">        Class cc = c.getClass();</span><br><span class="line">        Field f = cc.getDeclaredField(<span class="string">&quot;module&quot;</span>);</span><br><span class="line">        f.setAccessible(<span class="keyword">true</span>);</span><br><span class="line">        f.set(c,Test.class.getModule());</span><br><span class="line"></span><br><span class="line">        con.setAccessible(<span class="keyword">true</span>);</span><br><span class="line">        System.out.println(con.newInstance(<span class="keyword">null</span>));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 <p>结果如下：</p>
-<img src="/2021/09/27/%E7%AA%81%E7%A0%B4-JDK9-%E4%BB%A5%E4%B8%8A-module-%E8%AE%BF%E9%97%AE%E9%99%90%E5%88%B6/6.png" class="">
-
+<img src="/2021/09/28/%E7%BB%95%E8%BF%87-JDK9-%E4%BB%A5%E4%B8%8A-module-%E8%AE%BF%E9%97%AE%E9%99%90%E5%88%B6/6.png" class="">
 
       </div>
       
@@ -193,20 +181,9 @@ MathJax = {
           <div class="post-attach">
             <span class="post-pubtime">
               <i class="iconfont icon-updatetime" title="Update time"></i>
-              2021-09-27 17:52:45
+              2021-09-28 18:36:56
             </span>
             
-                  <span class="post-tags">
-                    <i class="iconfont icon-tags" title="Tags"></i>
-                    
-                    <span class="span--tag">
-                      <a href="/tags/Java/" title="Java">
-                        <b>#</b> Java
-                      </a>
-                    </span>
-                    
-                  </span>
-              
           </div>
           <div class="post-foot-prev">
             
@@ -513,12 +490,12 @@ MathJax = {
       </a>
       <div class="share-content hidden">
         
-          <a class="share-item" href="https://twitter.com/intent/tweet?text=' + %E7%AA%81%E7%A0%B4%20JDK9%20%E4%BB%A5%E4%B8%8A%20module%20%E8%AE%BF%E9%97%AE%E9%99%90%E5%88%B6 + '&url=' + http%3A%2F%2Fexample.com%2F2021%2F09%2F27%2F%25E7%25AA%2581%25E7%25A0%25B4-JDK9-%25E4%25BB%25A5%25E4%25B8%258A-module-%25E8%25AE%25BF%25E9%2597%25AE%25E9%2599%2590%25E5%2588%25B6%2F + '" target="_blank" title="Twitter">
+          <a class="share-item" href="https://twitter.com/intent/tweet?text=' + %E7%BB%95%E8%BF%87%20JDK9%20%E4%BB%A5%E4%B8%8A%20module%20%E8%AE%BF%E9%97%AE%E9%99%90%E5%88%B6 + '&url=' + http%3A%2F%2Fexample.com%2F2021%2F09%2F28%2F%25E7%25BB%2595%25E8%25BF%2587-JDK9-%25E4%25BB%25A5%25E4%25B8%258A-module-%25E8%25AE%25BF%25E9%2597%25AE%25E9%2599%2590%25E5%2588%25B6%2F + '" target="_blank" title="Twitter">
             <i class="iconfont icon-twitter"></i>
           </a>
         
         
-          <a class="share-item" href="https://www.facebook.com/sharer.php?u=http://example.com/2021/09/27/%E7%AA%81%E7%A0%B4-JDK9-%E4%BB%A5%E4%B8%8A-module-%E8%AE%BF%E9%97%AE%E9%99%90%E5%88%B6/" target="_blank" title="Facebook">
+          <a class="share-item" href="https://www.facebook.com/sharer.php?u=http://example.com/2021/09/28/%E7%BB%95%E8%BF%87-JDK9-%E4%BB%A5%E4%B8%8A-module-%E8%AE%BF%E9%97%AE%E9%99%90%E5%88%B6/" target="_blank" title="Facebook">
             <i class="iconfont icon-facebooksquare"></i>
           </a>
         
