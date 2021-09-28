@@ -142,7 +142,10 @@ MathJax = {
         
       </div>
       <div class="markdown-body">
-        <p>从 JDK9 以上新增了 module。它可以限制我们对于包的访问，而在 JDK9 之前我们只能使用 public、protected、private 和默认的包权限来进行访问控制。</p>
+        <h3 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h3><p>在 JDK9 以上使用反射并修改对应类 Class 的 module 属性即可绕过访问限制，代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.lang.reflect.Constructor;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Field;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        Class c = Class.forName(<span class="string">&quot;jdk.internal.loader.BootLoader&quot;</span>);</span><br><span class="line">        Constructor con = c.getDeclaredConstructor(<span class="keyword">new</span> Class[]&#123;&#125;);</span><br><span class="line"></span><br><span class="line">        Class cc = c.getClass();</span><br><span class="line">        Field f = cc.getDeclaredField(<span class="string">&quot;module&quot;</span>);</span><br><span class="line">        f.setAccessible(<span class="keyword">true</span>);</span><br><span class="line">        f.set(c,Test.class.getModule());</span><br><span class="line"></span><br><span class="line">        con.setAccessible(<span class="keyword">true</span>);</span><br><span class="line">        System.out.println(con.newInstance(<span class="keyword">null</span>));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h3><p>从 JDK9 以上新增了 module。它可以限制我们对于包的访问，而在 JDK9 之前我们只能使用 public、protected、private 和默认的包权限来进行访问控制。</p>
 <p>在 JDK9 以上的 jar 包中新增了 module-info 文件，其中的关键字 exports 来指定该模块下哪些包可以被访问。</p>
 <img src="/2021/09/28/%E7%BB%95%E8%BF%87-JDK9-%E4%BB%A5%E4%B8%8A-module-%E8%AE%BF%E9%97%AE%E9%99%90%E5%88%B6/1.png" class="" title="module-info">
 
@@ -192,6 +195,21 @@ MathJax = {
       
     </div>
     
+  <div id="btn-catalog" class="btn-catalog">
+    <i class="iconfont icon-catalog"></i>
+  </div>
+  <div class="post-catalog hidden" id="catalog">
+    <div class="title">Contents</div>
+    <div class="catalog-content">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BB%93%E8%AE%BA"><span class="toc-text">结论</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%86%E6%9E%90"><span class="toc-text">分析</span></a></li></ol>
+    </div>
+  </div>
+
+  
+<script src="/js/catalog.js"></script>
+
+
+
 
     
       <div class="comments-container">
