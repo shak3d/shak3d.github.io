@@ -70,7 +70,7 @@
         <img src="/images/avatar.png" alt="">
       
     </a>
-    <div class="nickname"><a href="/">shak3d</a></div>
+    <div class="nickname"><a href="/">Oranges</a></div>
   </div>
   <div class="navbar">
     <ul>
@@ -142,8 +142,7 @@ MathJax = {
         
       </div>
       <div class="markdown-body">
-        <hr>
-<p>从 JDK9 以上新增了 module。它可以限制我们对于包的访问，而在 JDK9 之前我们只能使用 public、protected、private 和默认的包权限来进行访问控制。</p>
+        <p>从 JDK9 以上新增了 module。它可以限制我们对于包的访问，而在 JDK9 之前我们只能使用 public、protected、private 和默认的包权限来进行访问控制。</p>
 <p>在 JDK9 以上的 jar 包中新增了 module-info 文件，其中的关键字 exports 来指定该模块下哪些包可以被访问。</p>
 <img src="/2021/09/28/%E7%BB%95%E8%BF%87-JDK9-%E4%BB%A5%E4%B8%8A-module-%E8%AE%BF%E9%97%AE%E9%99%90%E5%88%B6/1.png" class="" title="module-info">
 
@@ -171,6 +170,7 @@ MathJax = {
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.lang.reflect.Constructor;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Field;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        Class c = Class.forName(<span class="string">&quot;jdk.internal.loader.BootLoader&quot;</span>);</span><br><span class="line">        Constructor con = c.getDeclaredConstructor(<span class="keyword">new</span> Class[]&#123;&#125;);</span><br><span class="line"></span><br><span class="line">        Class cc = c.getClass();</span><br><span class="line">        Field f = cc.getDeclaredField(<span class="string">&quot;module&quot;</span>);</span><br><span class="line">        f.setAccessible(<span class="keyword">true</span>);</span><br><span class="line">        f.set(c,Test.class.getModule());</span><br><span class="line"></span><br><span class="line">        con.setAccessible(<span class="keyword">true</span>);</span><br><span class="line">        System.out.println(con.newInstance(<span class="keyword">null</span>));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 <p>结果如下：</p>
 <img src="/2021/09/28/%E7%BB%95%E8%BF%87-JDK9-%E4%BB%A5%E4%B8%8A-module-%E8%AE%BF%E9%97%AE%E9%99%90%E5%88%B6/6.png" class="">
+
 
       </div>
       
@@ -200,18 +200,22 @@ MathJax = {
 
 
 
+  
+<link rel="stylesheet" href="/css/gitalk.css">
+
+  
+<script src="/js/gitalk.min.js"></script>
+
+  
 <script src="/js/md5.min.js"></script>
 
 
-
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.css">
-  <script src="https://cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js"></script>
-
   <div id="gitalk-container"></div>
+
   <script>
     const gitalk = new Gitalk({
       clientID: 'dec8b48be297cbd4c190',
-      clientSecret: '945c437932a6fb8aa229b3a680bafe35ef23d2f7',
+      clientSecret: '796f90bbd4916fbc0eb4a1459a0cb3f766f6ee4d',
       repo: 'blog_gitalk',
       owner: 'shak3d',
       admin: ['shak3d'],
@@ -235,6 +239,36 @@ MathJax = {
         <li>
           <a title="github" target="_blank" rel="noopener" href="https://github.com/zchengsite/hexo-theme-oranges">
             <i class="iconfont icon-github"></i>
+          </a>
+        </li>
+      
+        <li>
+          <a title="email" href="">
+            <i class="iconfont icon-envelope"></i>
+          </a>
+        </li>
+      
+        <li>
+          <a title="facebook" href="">
+            <i class="iconfont icon-facebooksquare"></i>
+          </a>
+        </li>
+      
+        <li>
+          <a title="twitter" href="">
+            <i class="iconfont icon-twitter"></i>
+          </a>
+        </li>
+      
+        <li>
+          <a title="wechat" href="">
+            <i class="iconfont icon-wechat"></i>
+          </a>
+        </li>
+      
+        <li>
+          <a title="weibo" href="">
+            <i class="iconfont icon-weibo"></i>
           </a>
         </li>
       
